@@ -55,7 +55,7 @@ for sat = 1:element_orb(1)
     for dt = 0:dT:T % Delta de Tempo (dia solar)
         n = sqrt(mi/a^3)/(2*pi); % Movimento Médio (orbitas/ dia solar)
         Mg = M0 + 360*(n*dt - fix(n*dt) - fix((M0 + 360*(n*dt - fix(n*dt)))/360));
-        % M (Anoalia Média) em graus
+        % M (Anomalia Média) em graus
         Mr = Mg*pi/180; %M (Anoalia Média) em radianos
         Er = vpasolve(Mr == E - e*sin(E),E); % E (Anomalia Excentrica) em radianos
         Eg = vpa(Er*180/pi); %E (Anomalia Excentrica) em graus
@@ -85,7 +85,6 @@ for sat = 1:element_orb(1)
         end
         ag0 = dalpha + omega - 360*(fix((dalpha + omega)/360));
         % Ascensao Reta Geocentrica do satélite em graus
-        
         ag0r = vpa(ag0*pi/180); % Ascensao Reta Geocentrica do satélite em radianos
         dg0r = (sin(ur)/abs(sin(ur)))*acos(cos(ur)/cos(dalphar));
         % Declinaçao Geocentrica do satélite em radianos
