@@ -19,11 +19,11 @@ lb_elem = [0.0001; Rt; 0; 0.0001; 0.0001; 0.0001];
 ub_elem = [i_max; a_max; e_max; 359.9999; 359.9999; 359.9999];
 lb = [1; lb_elem]; % x >=
 ub = [qtd_sat; ub_elem]; % x <=
-for sat = 1:qtd_sat
+for sat = 1:qtd_sat-1
     lb = [lb; lb_elem];
     ub = [ub; ub_elem];
 end
-options = optimoptions('ga', 'PlotFcn', {@gaplotbestf,@gaplotstopping},'FitnessScalingFcn', @fitscalingprop,'PopulationSize',50, 'FitnessLimit', -1,'FunctionTolerance', 1e-2)
+options = optimoptions('ga', 'PlotFcn', {@gaplotbestf,@gaplotstopping},'FitnessScalingFcn', @fitscalingprop,'PopulationSize',50 ,'FitnessLimit', -1,'FunctionTolerance', 1e-2)
 %’PlotFcn’, {@gaplotbestf,@gaplotstopping: Plota gráficos da porcentagem da
 % área de cobertura pelo no de geraçoes
 % e das condiçoes de parada, respectivamente
@@ -32,5 +32,5 @@ options = optimoptions('ga', 'PlotFcn', {@gaplotbestf,@gaplotstopping},'FitnessS
 %igual a 1
 %’FunctionTolerance’, 1e-2: Fator de parada quando a média e o melhor valor
 % tiverem uma diferença menor que 10^-2
-%[elementos_orbitais, porc_Area, exitflag, output, populaion,score] = 
-ga(Porc_Area_Cobertura, nvars,[],[],[],[],lb,ub) %,Perigeu,options)
+
+[elementos_orbitais, porc_Area, exitflag, output, populaion, score] = ga(Porc_Area_Cobertura, nvars,[],[],[],[],lb,ub,Perigeu,Int,options)
