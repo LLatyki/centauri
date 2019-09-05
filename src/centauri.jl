@@ -1,47 +1,23 @@
-module Centauri
-
-export JD_J2000, R0, Rm, m0, J2, Rs, ne, au2m, sunRad
-export a_wgs84, b_wgs84, f_wgs84, e_wgs84, el_wgs84
-
-import Base: asin, atan, copy, cos, deepcopy, getindex, mod, setindex!, sin,
-       show
-
-using Interpolations
-using LinearAlgebra
-using OptionalData
-using Parameters
-using PolynomialRoots
-using Printf
-using ReferenceFrameRotations
-using RemoteFiles
-using StaticArrays
-using SparseArrays
-using Statistics
 using SatelliteToolbox
+using Plots
 
-# Re-exporting symbols from ReferenceFrameRotations.jl.
-export DCM
-export Quaternion
+include("simulators/objectives/objective_functions.jl")
 
-################################################################################
-#                             Types and Structures
-################################################################################
+plotly()
+size = 800
 
-include("types.jl")
+cost = Array{Float64}(undef, size)
+med_rt = Array{Float64}(undef, size)
+H = Array{Int64}(undef, size)
 
-################################################################################
-#                                  Constants
-################################################################################
-
-include("constants.jl")
-
-################################################################################
-#                                    Files
-################################################################################
-
-include("mission/coverage_data.jl")
-include("mission/satellite_data.jl")
-
-include("objectives/objective_functions.jl")
-
-end # module
+for i = 1:size
+    h = i + 200 
+    orbit = Orbit(0., Rm + h * 1000., 0., 0., 0., 0., 0.) 
+    H[i] = h
+    cost[i] = orbit_cost(orbit)
+    med_rt[i] = medium_revisit_time(orbit)
+end
+cost = plot(H, cost)
+med_rt = plot(H, med_rt)
+multi_objective = plot(cost, med_rt)
+plot(cost, med_rt, multi_objective)
