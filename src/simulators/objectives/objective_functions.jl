@@ -52,15 +52,13 @@ function discard_cost(orb_elem::Orbit)
     0
 end
 
-function access(orb_elem::Orbit, step::Int)
+function access(orb_elem::Orbit, step::Int, simulation_time::Number)
     # Computes the access of a satellite to a determined point during some period of time
     # Returns a boolean list
     ωearth = 2 * pi / (24 * 60 * 60)
 
     orbp = init_orbit_propagator(Val{:twobody}, orb_elem)
-    mission_time_sec = mission_time() * 24 * 60 * 60
-
-    o, r, v = propagate!(orbp, 0:step:mission_time_sec)
+    o, r, v = propagate!(orbp, 0:step:simulation_time)
     x, y, z = extract_dim(r)
 
     n = length(r)
@@ -88,9 +86,11 @@ end
 
 function medium_revisit_time(orb_elem::Orbit)    
     false_count = 0
-    step  = 100
-    visit = access(orb_elem, step)
+    step  = 50
+    simulation_time = mission_time() * 24 * 60 * 60 / 10
+    visit = access(orb_elem, step, simulation_time)
     n = length(visit)
+    println("length visit:", n)
 
     count = Int[]
     for i = 1:n
@@ -104,10 +104,19 @@ function medium_revisit_time(orb_elem::Orbit)
 
     sum = 0
     n = length(count)
+    println("length count:", n)
+
     for i = 1:n
         sum = sum + count[i]
     end
-    step * sum / n
+
+    if n == 0
+        println("medium:",  simulation_time)
+        simulation_time
+    else
+        println("medium:",  step * sum / n)
+        step * sum / n
+    end
 end
 
 function max_revisit_time(orb_elem::Orbit)
