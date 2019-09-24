@@ -57,7 +57,7 @@ function access(orb_elem::Orbit, step::Int, simulation_time::Number)
     # Returns a boolean list
     ωearth = 2 * pi / (24 * 60 * 60)
 
-    orbp = init_orbit_propagator(Val{:twobody}, orb_elem)
+    orbp = init_orbit_propagator(Val{:J4}, orb_elem)
     o, r, v = propagate!(orbp, 0:step:simulation_time)
     x, y, z = extract_dim(r)
 

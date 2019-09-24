@@ -50,7 +50,7 @@ function extract_dim(r)
 end
 
 orbit = Orbit(0., Rm + 1000000., 0.02, 0.1, 0.1, 0.1, 0.) 
-orbp = init_orbit_propagator(Val{:twobody}, orbit)
-o, r, v = propagate!(orbp, 0:20:10000)
+orbp = init_orbit_propagator(Val{:J4}, orbit)
+o, r, v = propagate!(orbp, 0:20:1000000)
 x, y, z = extract_dim(r)
 plot!(x, y, z, color = :black, w = 2)
