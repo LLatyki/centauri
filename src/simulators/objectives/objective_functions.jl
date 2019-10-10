@@ -90,7 +90,6 @@ function medium_revisit_time(orb_elem::Orbit)
     simulation_time = mission_time() * 24 * 60 * 60 / 10
     visit = access(orb_elem, step, simulation_time)
     n = length(visit)
-    println("length visit:", n)
 
     count = Int[]
     for i = 1:n
@@ -104,17 +103,13 @@ function medium_revisit_time(orb_elem::Orbit)
 
     sum = 0
     n = length(count)
-    println("length count:", n)
-
     for i = 1:n
         sum = sum + count[i]
     end
 
     if n == 0
-        println("medium:",  simulation_time)
         simulation_time
     else
-        println("medium:",  step * sum / n)
         step * sum / n
     end
 end
