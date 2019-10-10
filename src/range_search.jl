@@ -28,8 +28,8 @@ for j = 1:sizeH
         h = j + 200
         i =  (k - 1) * 10 * pi / 180
 
-        println(h)
-        println(i)
+        println("height:", h) 
+        println("inclination:", i)
 
         orbit = Orbit(Rm + h * 1000., e, i, Ω, ω, f) 
         H[j, k] = h
