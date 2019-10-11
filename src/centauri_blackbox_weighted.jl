@@ -1,12 +1,13 @@
 using SatelliteToolbox
 using Plots
-using Metaheuristics
+using BlackBoxOptim
 
 include("simulators/objectives/objective_functions.jl")
 
 plotly()
-sizeH = 800
-sizeI = 10
+
+sizeI = 10.
+sizeH = 800.
 alpha = 1
 beta = 1
 
@@ -20,8 +21,11 @@ e = 0.
 ω = 0.
 # f: True anomaly
 f = 0.
-    
-function average_objective(H, I)
+
+# Objective function    
+function average_objective(x)
+    H = x[1]
+    I = x[2]
     h = H + 200
     i =  (I - 1) * 10 * pi / 180
 
@@ -31,16 +35,9 @@ function average_objective(H, I)
     orbit = Orbit(Rm + h * 1000., e, i, Ω, ω, f) 
     cost = orbit_cost(orbit)
     revisit = medium_revisit_time(orbit)
-    alpha*cost + beta*revisit
+    return (alpha*cost + beta*revisit)
 end
 
-# Objective function
-average(x) = average_objective(x[1], x[2]) 
 
-bounds = [0 0;
-    sizeH sizeI 
-]
-
-de = DE(F=1, N=1, CR=0.1)
-
-result = optimize(average, bounds, de)
+compare = compare_optimizers(average_objective; SearchRange = [(0., sizeH), (0., sizeI)], NumDimensions = 2, MaxTime = 10.0);
+res = bboptimize(average_objective; SearchRange = [(0., sizeH), (0., sizeI)], NumDimensions = 2, MaxTime = 60.0)

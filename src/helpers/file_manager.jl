@@ -1,10 +1,14 @@
 using CSV
 using Tables
 
-
 function write_file(table)
     name = file_name()
     CSV.write(name, table)
+end
+
+function read_file()
+    name = file_name()
+    CSV.write(name)
 end
 
 function append_file(table)
