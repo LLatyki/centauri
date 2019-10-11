@@ -8,7 +8,7 @@ end
 
 function read_file()
     name = file_name()
-    CSV.write(name)
+    CSV.read(name)
 end
 
 function append_file(table)
