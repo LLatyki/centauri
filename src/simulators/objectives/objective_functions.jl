@@ -6,6 +6,7 @@
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # ==#
 
 using SatelliteToolbox
+using PolynomialRoots
 
 ################################################################################
 #                                    Files
@@ -114,14 +115,18 @@ function medium_revisit_time(orb_elem::Orbit)
     end
 end
 
-function max_revisit_time(orb_elem::Orbit)
-
-end
-
 
 function access_angle(orb_elem::Orbit)
     # Covered angle for the given orbit altitude
-    acos(Rm / orb_elem.a)
+    a = orb_elem.a
+    alfa = sensor_aperture()/2
+    tg = tan(alfa)
+    r = roots([tg^2*a^2 - Rm^2, - 2*a*tg^2, tg^2+1])
+
+    k = Rm - r[1]
+    l = tg*(a-Rm+k)
+
+    abs(asin(l/Rm))
 end
 
 function extract_dim(r)

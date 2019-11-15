@@ -11,5 +11,5 @@ export maximum_revisit_time
 function access_point()
     # Coordinates of the point that must be accessed.
     # (latitude -90:90, longitude -180:180)
-    (lat = -23.17944, lon = -45.88694)
+    (lat =  -15.5989, lon = -56.0949)
 end
