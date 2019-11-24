@@ -7,6 +7,7 @@
 
 using SatelliteToolbox
 using PolynomialRoots
+using Statistics
 
 ################################################################################
 #                                    Files
@@ -16,7 +17,7 @@ include("mission/coverage_data.jl")
 include("mission/satellite_data.jl")
 
 export orbit_cost
-export medium_revisit_time
+export mean_coverage_gap
 
 function orbit_cost(orb_elem::Orbit)
     # Total cost of the orbit for the given mission in ΔV
@@ -71,8 +72,9 @@ function access(orb_elem::Orbit, step::Int, simulation_time::Number)
         lon = lon + ωearth * i * step
         access_point_direction = [Rm * cos(lat) * cos(lon), Rm * cos(lat) * sin(lon), Rm * sin(lat)]
         satellite_pos = [x[i], y[i], z[i]]
-        sep = separation(satellite_pos, access_point_direction)
-        if sep < access_angle(orb_elem)
+        H  = sqrt(x[i]^2 + y[i]^2+ z[i]^2)
+        lambda = separation(satellite_pos, access_point_direction)
+        if (sensor_aperture()/2 > nadir(H, lambda)) & (lambda < pi/2)
             visit[i] = true
         else
             visit[i] = false
@@ -85,13 +87,12 @@ function separation(u, v)
     acos((u[1] * v[1] + u[2] * v[2] + u[3] * v[3]) / sqrt((u[1]^2 + u[2]^2 + u[3]^2) * (v[1]^2 + v[2]^2 + v[3]^2)))
 end
 
-function medium_revisit_time(orb_elem::Orbit)    
+function mean_coverage_gap(orb_elem::Orbit)    
     false_count = 0
-    step  = 50
+    step  = 10
     simulation_time = mission_time() * 24 * 60 * 60 / 10
     visit = access(orb_elem, step, simulation_time)
     n = length(visit)
-
     count = Int[]
     for i = 1:n
         if visit[i] == false
@@ -102,32 +103,19 @@ function medium_revisit_time(orb_elem::Orbit)
         end
     end
 
-    sum = 0
-    n = length(count)
-    for i = 1:n
-        sum = sum + count[i]
-    end
-
-    if n == 0
+    if length(count) == 0
         simulation_time
     else
-        step * sum / n
+        step *Statistics.mean(count)
     end
 end
 
 
-function access_angle(orb_elem::Orbit)
-    # Covered angle for the given orbit altitude
-    a = orb_elem.a
-    alfa = sensor_aperture()/2
-    tg = tan(alfa)
-    r = roots([tg^2*a^2 - Rm^2, - 2*a*tg^2, tg^2+1])
-
-    k = Rm - r[1]
-    l = tg*(a-Rm+k)
-
-    abs(asin(l/Rm))
+function nadir(H, lambda)
+    rho = asin(Rm/H)
+    eta = atan(sin(rho)*sin(lambda)/(1-sin(rho)*cos(lambda)))
 end
+
 
 function extract_dim(r)
     n = length(r)

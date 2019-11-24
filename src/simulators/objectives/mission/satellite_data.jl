@@ -12,7 +12,7 @@ export mission_time
 function satellite_data()
     # Satellite physical data
     # Mass in kg, Area in m², Drag coefficient.
-    (m = 1450, A = 5, Cd = 0.9)
+    (m = 1450, A = 5, Cd = 2)
 end 
 
 function sensor_aperture()

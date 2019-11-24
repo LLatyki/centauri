@@ -3,8 +3,8 @@ using Plots
 include("centauri_blackbox_multiobjective.jl")
 plotly()
 
-Irange = (-90., 90.)
-Hrange = (0., 900.)
+Irange = (0., 90.)
+Hrange = (0., 800.)
 
 pf = pareto(Hrange, Irange)
 
@@ -21,7 +21,7 @@ for j=1:sz
     H[j] = h + 200
     I[j] = i
 end
-objectives_plot = scatter(x, y, xaxis = ("Cost  (m/s)"), yaxis = ("Revisit Time (s)"), xtickfont = font(12), ytickfont = font(12), guidefontsize = 15, label="")
+objectives_plot = scatter(x, y/60, xaxis = ("Cost (m/s)"), yaxis = ("MCG (min)"), xtickfont = font(12), ytickfont = font(12), guidefontsize = 15, label="")
 params_plot = scatter(H, I, xaxis = ("Height (Km)"), yaxis = ("Inclination (degrees)"), xtickfont = font(12), ytickfont = font(12), guidefontsize = 15, label="")
 plot(params_plot)
 plot(objectives_plot)

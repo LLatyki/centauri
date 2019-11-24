@@ -4,6 +4,7 @@ using BlackBoxOptim
 
 include("simulators/objectives/objective_functions.jl")
 
+
 plotly()
 
 # a: Semimajor axis
@@ -31,15 +32,15 @@ function multi_objective(x)
     
     orbit = Orbit(Rm + h * 1000., e, i, Ω, ω, f) 
     cost = orbit_cost(orbit)
-    revisit = medium_revisit_time(orbit)
+    revisit = mean_coverage_gap(orbit)
     return (cost, revisit)
 end
 
 function pareto(sizeH,sizeI)
     res = bboptimize(multi_objective; Method=:borg_moea,
                 FitnessScheme=ParetoFitnessScheme{2}(is_minimizing=true),
-                SearchRange=[sizeH, sizeI], NumDimensions=2, ϵ=0.05,
-                MaxSteps=5000, TraceInterval=1.0, TraceMode=:verbose);
+                SearchRange=[sizeH, sizeI], NumDimensions=2, ϵ=0.1,
+                MaxSteps=2000, TraceInterval=1.0, TraceMode=:verbose);
     
     return pareto_frontier(res)
 end
