@@ -1,6 +1,5 @@
 using Plots
 using Tables
-include("centauri_blackbox_multiobjective.jl")
 include("helpers/file_manager.jl")
 
 plotly()
@@ -50,3 +49,31 @@ med_rt_plot_170 = plot(H, columns[22]/60, xaxis = ("Height (km)"), yaxis = ("MCG
 
 cost_plot_175 = plot(H, columns[23], xaxis = ("Height (km)"), yaxis = ("ΔV (m/s)"), linewidth =4, xtickfont = font(12), ytickfont = font(12) , guidefontsize = 15, label="")
 med_rt_plot_175 = plot(H, columns[24]/60, xaxis = ("Height (km)"), yaxis = ("MCG (min)"), linewidth =3, xtickfont = font(12), ytickfont = font(12) , guidefontsize = 15, label="")
+cost_plot_5 = [
+    "x" => H,
+    "y" =>  columns[1],
+    "xaxis" => ("Height (km)"),
+    "yaxis" => ("ΔV (m/s)"), 
+    "linewidth" => 4, 
+    "xtickfont" => font(12), 
+    "ytickfont" => font(12),
+    "guidefontsize" => 15,
+    "label"=> ""
+]
+med_rt_plot_5 = plot(H, columns[2]/60, xaxis = ("Height (km)"), yaxis = ("MCG (min)"), linewidth =3, xtickfont = font(12), ytickfont = font(12) , guidefontsize = 15, label="")
+
+trace2 = [
+  "x" => [20, 30, 40],
+  "y" => [50, 60, 70],
+  "xaxis" => "x2",
+  "yaxis" => "y2",
+  "type" => "scatter"
+]
+data = [trace1, trace2]
+layout = [
+  "xaxis" => ["domain" => [0, 0.45]],
+  "yaxis2" => ["anchor" => "x2"],
+  "xaxis2" => ["domain" => [0.55, 1]]
+]
+response = Plotly.plot(data, ["layout" => layout, "filename" => "simple-subplot", "fileopt" => "overwrite"])
+plot_url = response["url"]

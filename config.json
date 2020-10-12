@@ -1,0 +1,35 @@
+{
+    "mission": {
+        "access_area": {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -15.5989,
+                    -56.0949
+                ]
+            }
+        },
+        "lifetime": 730
+    },
+    "satellite": {
+        "injection_orbit": {
+            "eccentricity": 0,
+            "semimajor_axis": 6451,
+            "inclination": 0,
+            "ascending_node_longitude": 0,
+            "periapsis_argument": 0,
+            "true_anomaly": 0
+        },
+        "mass": 1450,
+        "cross_section_area": 5,
+        "drag_coefficient": 2,
+        "sensor_aperture": 30
+    },
+    "solution_space": {
+        "min_height": 0,
+        "max_height": 800,
+        "min_inclination": 0,
+        "max_inclination": 90
+    }
+}
