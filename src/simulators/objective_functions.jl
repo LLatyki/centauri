@@ -9,46 +9,47 @@ using SatelliteToolbox
 using PolynomialRoots
 using Statistics
 
-################################################################################
-#                                    Files
-################################################################################
-
 export orbit_cost
 export mean_coverage_gap
 
 function orbit_cost(orb_elem::Orbit, injection_orbit::Orbit, satellite, mission_lifetime)
-    # Total cost of the orbit for the given mission in ΔV
+    # Total cost of the orbit for the given mission in propellant mass
 
     # Cost of transfer from injection orbit to the given orbit.
-    # Now, we consider only hommann transfers between coplanar orbits
+    # Considering a hommann transfers between coplanar orbits and orbit plane change at apoapsis
     a1 = injection_orbit.a
     a2 = orb_elem.a
     ΔV1 = sqrt(m0 / a1) * (sqrt(2a2 / (a1 + a2)) - 1)
     ΔV2 = sqrt(m0 / a2) * (1 - sqrt(2a1 / (a1 + a2)))
-    transfer_cost = ΔV1 + ΔV2
+    homman_transfer_cost = ΔV1 + ΔV2
+
+    # Plane transfer at the best condition
+    i1 = injection_orbit.i
+    i2 = orb_elem.i
+    V1 = sqrt(m0 / a1)
+    V2 = sqrt(m0 / a2)
+    plane_change_v = min(V1, V2)
+    plane_change_cost = 2*plane_change_v*sin((i1 - i2)/2)
 
     # Wertz pg 69
     Cd = satellite.Cd
     A = satellite.A
     m = satellite.M
-    a  = orb_elem.a
-    ρ = expatmosphere(a - Rm)
-    V = sqrt(m0 / a)
+    ρ = expatmosphere(a2 - Rm)
 
-    ΔVrev = pi * (Cd * A / m) * ρ * a * V
-    T = 2 * pi * sqrt(a^3 / m0)
+    ΔVrev = pi * (Cd * A / m) * ρ * a2 * V2
+    T = 2 * pi * sqrt(a2^3 / m0)
 
     maintenance_cost = ΔVrev * mission_lifetime * 24 * 60 * 60 / T
 
-    # Cost of transfer from operation orbit to the discard orbit
-    discard_costs = 0
-    return transfer_cost + maintenance_cost + discard_costs
+    ΔVT = homman_transfer_cost + plane_change_cost + maintenance_cost 
+    return ΔVT
 end
 
 function mean_coverage_gap(orb_elem::Orbit, satellite, access_area, mission_lifetime)    
     false_count = 0
     step  = 10
-    simulation_time = mission_lifetime * 24 * 60 * 60 / 10
+    simulation_time = mission_lifetime * 24 * 60 * 60
     visit = access(orb_elem, satellite, access_area, step, simulation_time)
     n = length(visit)
     count = Int[]

@@ -24,12 +24,15 @@
         "mass": 1450,
         "cross_section_area": 5,
         "drag_coefficient": 2,
-        "sensor_aperture": 30
+        "sensor_aperture": 30,
+        "exhaust_velocity": 4000
     },
     "solution_space": {
         "min_height": 0,
-        "max_height": 800,
+        "max_height": 1000,
         "min_inclination": 0,
-        "max_inclination": 90
+        "max_inclination": 90,
+        "min_long_ascending_node": 0,
+        "max_long_ascending_node": 90
     }
 }

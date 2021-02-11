@@ -17,3 +17,4 @@ Arquivo config.json com os dados :
 - julia
 - ] 
 - activate simulation
+- include("src/centauri.jl")
