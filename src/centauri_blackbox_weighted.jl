@@ -1,90 +1,59 @@
 using SatelliteToolbox
-using Plots
 using BlackBoxOptim
 
-include("simulators/objective_functions.jl")
+include("simulators/orbit_cost.jl")
+include("simulators/revisit.jl")
 include("simulation.jl")
 
-plotly()
-
-
-Irange = (0., 180.)
-Hrange = (200., 1000.)
-Ωrange = (0.0, pi/2)
-
-# a: Semimajor axis
-# e: Eccentricity 
-e = 0.
-# i: Inclination 
-# Ω: Longitude of the ascending node
-# ω: Argument of periapsis 
-ω = 0.
-# f: True anomaly
-f = 0.
 
 settings = Simulation.initialize()
 
 
 # Objective function 
-function average_objective(alpha, x)
+function average_objective(alpha, min_cost, min_revisit, x)
     beta = 1- alpha
-    H = x[1]
-    I = x[2]
-    Ω = x[3]
     
+    a = x[1]
+    i = x[2]
+    Ω = x[3]
+
+    println("semimajor_axis:", a) 
+    println("inclination:", i)
+    println("right ascension of the ascending node:", Ω)
     satellite = settings.satellite
     injection_orbit = settings.injection_orbit
     access_area = settings.access_area
     mission_lifetime = settings.mission_lifetime
-    
-    orbit = Orbit(Rm + h * 1000., e, i, Ω, ω, f) 
-    orbit = Orbit(H, 0, i, Ω, 0, 0) 
-    cost = orbit_cost(orbit, injection_orbit, satellite, mission_lifetime)
-    revisit = mean_coverage_gap(orbit, satellite, access_area, mission_lifetime)
+
+    orbit = Orbit(a, 0, i, Ω, 0, 0) 
+    cost = orbit_cost(orbit, injection_orbit, satellite, mission_lifetime)/min_cost
+    revisit = mean_coverage_gap(orbit, satellite, access_area, mission_lifetime)/min_revisit
+
     return (alpha*cost + beta*revisit)
 end
 
-function average_objective_07(x)
-    average_objective(0.7, x)
-end
 
-function average_objective_06(x)
-    average_objective(0.6, x)
-end
+function optimize_and_print(weight, min_cost, min_revisit)
 
-function average_objective_05(x)
-    average_objective(0.5, x)
-end
+    Irange = (0.,  float(pi))
+    Arange = (Rm, Rm+10^6)
+    Ωrange = (0.0, float(pi))
+    e = 0
+    ω = 0
+    f = 0
 
-function average_objective_04(x)
-    average_objective(0.4, x)
-end
-
-function average_objective_03(x)
-    average_objective(0.3, x)
-end
-
-
-#compare = compare_optimizers(average_objective_05; SearchRange = [Hrange, Irange], NumDimensions = 2, MaxTime = 120.0);
-
-function optimize_and_print(weight)
-    average_objective_w(x) = average_objective(weight, x)
-    res = bboptimize(average_objective_w; SearchRange = [Hrange, Irange, Ωrange], NumDimensions = 2, MaxTime = 600.0, TraceMode=:verbose)
+    average_objective_w(y) = average_objective(weight, min_cost, min_revisit, y)
+    res = bboptimize(average_objective_w; SearchRange = [Arange, Irange, Ωrange], MaxTime = 600.0, TraceMode=:verbose)
 
     println("## " + str(weight) +" Cost ##")
     println("Best Pair")
     println(best_candidate(res))
     println("Fitness")
     println(best_fitness(res))
-    orbit = Orbit(Rm + (best_candidate(res)[1] +200 )* 1000., e, best_candidate(res)[2] * pi / 180, Ω, ω, f) 
+    orbit = Orbit(best_candidate(res)[1], e, best_candidate(res)[2] ,  best_candidate(res)[3], ω, f) 
     println("Cost")
     println(orbit_cost(orbit))
     println("MCG")
     println(mean_coverage_gap(orbit)/60)
+    return orbit
 end
-
-optimize_and_print(0.7)
-optimize_and_print(0.6)
-optimize_and_print(0.5)
-optimize_and_print(0.4)
-optimize_and_print(0.3)

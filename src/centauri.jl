@@ -8,8 +8,10 @@ using BlackBoxOptim
 # Escreve o output em uma pasta, imagens, curvas etc
 
 include("simulation.jl")
-include("simulators/objective_functions.jl")
-
+include("simulators/orbit_cost.jl")
+include("simulators/revisit.jl")
+include("simulators/orbit_simulator.jl")
+include("centauri_blackbox_weighted.jl")
 settings = Simulation.initialize()
 
 gr()
@@ -49,8 +51,7 @@ end
 
 pf = pareto(settings)
 
-sz  = size(pf)
-sz = sz[1]
+sz  = size(pf)[1]
 x = Array{Float64}(undef, sz)
 y = Array{Float64}(undef, sz)
 I = Array{Float64}(undef, sz)
@@ -64,6 +65,22 @@ H = (H .-Rm)/1000
 I = I*180/pi
 Ω = Ω*180/pi
 x = x/1000
-objectives_plot = scatter(x, y, xaxis = ("Cost (km/s)"), yaxis = ("MCG (sec)"), xtickfont = font(10), ytickfont = font(10), guidefontsize = 10, label="", reuse = false)
+objectives_plot = scatter(x, y, xaxis = ("Cost (km/s)"), yaxis = ("MCG (sec)"), xtickfont = font(10), ytickfont = font(10), guidefontsize = 12, label="", reuse = false)
 params_plot_1 = scatter(H, I, xaxis = ("Height (Km)"), yaxis = ("Inclination (degrees)"), xtickfont = font(10), ytickfont = font(10), guidefontsize = 10, label="", reuse = false)
-params_plot_2 = scatter(H, Ω, xaxis = ("Height (Km)"), yaxis = ("Longitude of the Ascending Node (degrees)"), xtickfont = font(10), ytickfont = font(10), guidefontsize = 10, label="", reuse = false)
+params_plot_2 = scatter(H, Ω, xaxis = ("Height (Km)"), yaxis = ("Longitude of the Ascending Node (degrees)"), xtickfont = font(10), ytickfont = font(10), guidefontsize = 12, label="", reuse = false)
+
+min_cost = x[1]
+min_revisit = last(y)
+
+savefig(objectives_plot, "objectives_plot.png")
+savefig(params_plot_1, "params_plot_1.png")
+savefig(params_plot_2, "params_plot_2.png")
+
+
+optimize_and_print(0.7, min_cost, min_revisit)
+optimize_and_print(0.6, min_cost, min_revisit)
+orbit = optimize_and_print(0.5, min_cost, min_revisit)
+optimize_and_print(0.4, min_cost, min_revisit)
+optimize_and_print(0.3, min_cost, min_revisit)
+
+orbit_elements_evolution(orbit, 10, settings.mission_lifetime*3600*24)

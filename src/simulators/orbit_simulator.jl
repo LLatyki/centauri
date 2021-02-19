@@ -1,56 +1,30 @@
 using SatelliteToolbox
 using Plots
+using LinearAlgebra
+gr()
 
-include("objectives/mission/coverage_data.jl")
-
-#######
-# plotly()
-# n = 100
-# ts = range(0, stop = 8π, length = n)
-# x = ts .* map(cos, ts)
-# y = (0.1ts) .* map(sin, ts)
-# z = 1:n
-# plot(x, y, z, zcolor = reverse(z), m = (10, 0.8, :blues, Plots.stroke(0)), leg = false, cbar = true, w = 1)
-# plot(x, y, z, zcolor = reverse(z), leg = false, cbar = true, w = 1)
-#########
-
-plotly()
-
-n = 300
-
-u = range(0, stop = 2 * π, length = n)
-v = range(0, stop = π, length = n)
-
-x = Rm * cos.(u) * sin.(v)';
-y = Rm * sin.(u) * sin.(v)';
-z = Rm * ones(n) * cos.(v)';
-
-# plot(x, y, z, color = :blue, w = 1)
-# 
-# lat = pi * access_point().lat / 180
-# lon = pi * access_point().lon / 180
-# 
-# x_AP = [Rm * cos(lat) * cos(lon)]
-# y_AP = [Rm * cos(lat) * sin(lon)]
-# z_AP = [Rm * sin(lat)]
-# plot!(x_AP, y_AP, z_AP, color = :red, seriestype = :scatter)
-
-
-function extract_dim(r)
-    n = length(r)
-    x = Array{Float64}(undef, n)
-    y = Array{Float64}(undef, n)
-    z = Array{Float64}(undef, n)
-    for i = 1:n
-        x[i] = r[i][1]
-        y[i] = r[i][2]
-        z[i] = r[i][3]
+function orbit_elements_evolution(orb_elem::Orbit, step::Int, simulation_time::Number)
+    orbp = init_orbit_propagator(Val{:J4}, orb_elem)
+    T = 0:step:simulation_time
+    O, R, V = propagate!(orbp, T)
+    sz  = size(O)[1]
+    E = Array{Float64}(undef, sz)
+    I = Array{Float64}(undef, sz)
+    A = Array{Float64}(undef, sz)
+    Ω = Array{Float64}(undef, sz)
+    for j=1:sz
+        E[j] = O[j].e
+        I[j] = O[j].i*180/pi
+        A[j] = O[j].a/1000
+        Ω[j] = O[j].Ω*180/pi
     end
-    x, y, z 
-end
+    eccentricity_plot = plot(T, E)
+    ascenscion_node_plot = plot(T, Ω)
+    semi_major_plot = plot(T, A)
+    inclination_plot = plot(T, I)
 
-orbit = Orbit(0., Rm + 1025601.0, 0, 17.1102*pi/180, 0., 0., 0.)
-orbp = init_orbit_propagator(Val{:J4}, orbit)
-o, r, v = propagate!(orbp, 0:10:2*365*24*60*60)
-x, y, z = extract_dim(r)
-plot!(x, y, z, color = :black, w = 2, label="")
+    savefig(eccentricity_plot, "eccentricity_plot.png")
+    savefig(ascenscion_node_plot, "ascenscion_node_plot.png")
+    savefig(semi_major_plot, "semi_major_plot.png")
+    savefig(inclination_plot, "inclination_plot.png")
+end

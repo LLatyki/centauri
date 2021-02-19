@@ -6,7 +6,7 @@ module Simulation
 
     export initialize
 
-
+    
     struct SolutionSpace
         a_range
         i_range

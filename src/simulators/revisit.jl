@@ -8,67 +8,7 @@
 using SatelliteToolbox
 using PolynomialRoots
 using Statistics
-
-export orbit_cost
 export mean_coverage_gap
-
-function orbit_cost(orb_elem::Orbit, injection_orbit::Orbit, satellite, mission_lifetime)
-    # Total cost of the orbit for the given mission in propellant mass
-
-    # Cost of transfer from injection orbit to the given orbit.
-    # Considering a hommann transfers between coplanar orbits and orbit plane change at apoapsis
-    a1 = injection_orbit.a
-    a2 = orb_elem.a
-    ΔV1 = sqrt(m0 / a1) * (sqrt(2a2 / (a1 + a2)) - 1)
-    ΔV2 = sqrt(m0 / a2) * (1 - sqrt(2a1 / (a1 + a2)))
-    homman_transfer_cost = ΔV1 + ΔV2
-
-    # Plane transfer at the best condition
-    i1 = injection_orbit.i
-    i2 = orb_elem.i
-    V1 = sqrt(m0 / a1)
-    V2 = sqrt(m0 / a2)
-    plane_change_v = min(V1, V2)
-    plane_change_cost = 2*plane_change_v*sin((i1 - i2)/2)
-
-    # Wertz pg 69
-    Cd = satellite.Cd
-    A = satellite.A
-    m = satellite.M
-    ρ = expatmosphere(a2 - Rm)
-
-    ΔVrev = pi * (Cd * A / m) * ρ * a2 * V2
-    T = 2 * pi * sqrt(a2^3 / m0)
-
-    maintenance_cost = ΔVrev * mission_lifetime * 24 * 60 * 60 / T
-
-    ΔVT = homman_transfer_cost + plane_change_cost + maintenance_cost 
-    return ΔVT
-end
-
-function mean_coverage_gap(orb_elem::Orbit, satellite, access_area, mission_lifetime)    
-    false_count = 0
-    step  = 10
-    simulation_time = mission_lifetime * 24 * 60 * 60
-    visit = access(orb_elem, satellite, access_area, step, simulation_time)
-    n = length(visit)
-    count = Int[]
-    for i = 1:n
-        if visit[i] == false
-            false_count = false_count + 1
-        elseif false_count > 0
-            push!(count, false_count)
-            false_count = 0
-        end
-    end
-
-    if length(count) == 0
-        simulation_time
-    else
-        step *Statistics.mean(count)
-    end
-end
-
 
 function access(orb_elem::Orbit, satellite, access_area, step::Int, simulation_time::Number)
     # Computes the access of a satellite to a determined point during some period of time
@@ -110,6 +50,28 @@ function nadir(H, lambda)
     eta = atan(sin(rho)*sin(lambda)/(1-sin(rho)*cos(lambda)))
 end
 
+function mean_coverage_gap(orb_elem::Orbit, satellite, access_area, mission_lifetime)    
+    false_count = 0
+    step  = 10
+    simulation_time = mission_lifetime * 24 * 60 * 60
+    visit = access(orb_elem, satellite, access_area, step, simulation_time)
+    n = length(visit)
+    count = Int[]
+    for i = 1:n
+        if visit[i] == false
+            false_count = false_count + 1
+        elseif false_count > 0
+            push!(count, false_count)
+            false_count = 0
+        end
+    end
+
+    if length(count) == 0
+        simulation_time
+    else
+        step *Statistics.mean(count)
+    end
+end
 
 function extract_dim(r)
     n = length(r)
